@@ -1,10 +1,9 @@
 <?php
 define('DS', DIRECTORY_SEPARATOR);
-class Stu
+class Student
 {
     public $files;
     public $dir;
-    public $background;
 
     public function __construct($dir){
         $this->dir = $dir;
@@ -174,9 +173,6 @@ class Stu
     }
 
 }
-
-$std = new Stu("E:\桌面\学籍验印2016\所有数据\src");
-$std->run($argv[1],$argv[2]);
 
   
       
