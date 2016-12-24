@@ -18,4 +18,6 @@ foreach ($handler as $key => $value) {
     pclose($value);
 }
 
+//É¾³ý»º´æ
+unlink('stdinfo.tmp');
 echo '¹²ºÄÊ±'.(time()-$start).'s';
