@@ -30,6 +30,11 @@ class Student
 
     public function getStuInfo()
     {
+        //先从文件里面读缓存
+        if(file_exists('stdinfo.tmp') && $tmp = file_get_contents('stdinfo.tmp')){
+            return unserialize($tmp);
+        }
+        //如果没有就从数据库里面拿
         $dsn = 'mysql:dbname=student;host=127.0.0.1';
         $user = 'root';
         $password = 'root';
@@ -46,6 +51,7 @@ class Student
         foreach ($data as $key => $value) {
             $stdInfos[$value['id_num']] = $value;
         }
+        file_put_contents('stdinfo.tmp', serialize($stdInfos));
         return $stdInfos;
     }
 
