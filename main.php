@@ -5,19 +5,24 @@ $handler = [];
 function run($start,$end){
     global $handler;
     for($i = $start;$i<$end;$i++){
-        $handler[] = popen('php worker.php '.$i.' '.$end,'r');    
+        $handler[] = popen('php worker.php '.$i.' '.$end,'r');   
     }    
 }
 
-// foreach (run(0,5) as $r) {
-//     echo $r."\n";
-// }
-run(0,4);
+//经过反复试验 在AMD X740 4核cpu的情况下 开7个进程速度是最快的180-190s之间
+run(0,7);
 
-foreach ($handler as $key => $value) {
-    pclose($value);
+foreach ($handler as $prc) {
+    //echo fgets($prc);
+    pclose($prc);
 }
 
-//删除缓存
-unlink('stdinfo.tmp');
+//删除缓存文件
+$files = scandir(getcwd());
+foreach ($files as $f) {
+    if(pathinfo($f,PATHINFO_EXTENSION) === 'tmp'){
+       unlink($f); 
+    }
+}
+
 echo '共耗时'.(time()-$start).'s';

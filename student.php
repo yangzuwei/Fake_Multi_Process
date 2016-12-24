@@ -6,6 +6,23 @@ class Student
     public $dir;
 
     public function __construct($dir){
+
+        $bg_w = $this->mask_w = 480; // 背景图片宽度  
+        $bg_h    = 672; // 背景图片高度  
+
+        $this->background = imagecreatetruecolor($bg_w,$bg_h); // 背景图片  
+        $white   = imagecolorallocate($this->background, 255, 255, 255); // 为真彩色画布创建白色背景，再设置为透明  
+        imagefill($this->background, 0, 0, $white);  
+        imageColorTransparent($this->background, $white); 
+
+        $font = 'C:\Windows\Fonts\simhei.ttf'; 
+        $fontSize = 14;
+        $fontY = imagefontheight($fontSize);
+
+        $this->mask_h = 3*$fontY + 10;
+
+        $this->mask = imagecreatetruecolor($this->mask_w,$this->mask_h);
+        imagefill($this->mask, 0, 0, $white); 
         $this->dir = $dir;
     }
 
@@ -28,10 +45,24 @@ class Student
       }
     }
 
+    public function getFiles()
+    {
+        //先从文件里面读缓存
+        if(file_exists('files.tmp')){
+            $tmp = file_get_contents('files.tmp');
+            $this->files = unserialize($tmp);
+        }else{
+            $this->scanAll($this->dir);
+            file_put_contents('files.tmp', serialize($this->files));
+        }
+
+    }
+
     public function getStuInfo()
     {
         //先从文件里面读缓存
-        if(file_exists('stdinfo.tmp') && $tmp = file_get_contents('stdinfo.tmp')){
+        if(file_exists('stdinfo.tmp')){
+            $tmp = file_get_contents('stdinfo.tmp');
             return unserialize($tmp);
         }
         //如果没有就从数据库里面拿
@@ -46,7 +77,7 @@ class Student
         }
         $dbh->query('set names gbk');
          
-        $data = $dbh->query('select * from student');
+        $data = $dbh->query('select * from students');
         $stdInfos = [];
         foreach ($data as $key => $value) {
             $stdInfos[$value['id_num']] = $value;
@@ -57,7 +88,7 @@ class Student
 
     public function run($argStart,$partNum)
     {
-        $this->scanAll($this->dir);
+        $this->getFiles();   
         //将要处理的文件数组分成10份
         $totalNum = count($this->files);
         $everyPartNum = intval($totalNum/$partNum)+1;
@@ -81,26 +112,28 @@ class Student
                 continue;
             }
             //在当前目录下建立对应的文件夹（如果不存在）
-            if(!is_dir(dirname(__FILE__).DS."res")){
-                mkdir(dirname(__FILE__).DS."res");
+            if(!is_dir(getcwd().DS."res")){
+                mkdir(getcwd().DS."res");
             }
             $school = $stdInfos[$stdIdNum]['school'];
-            if(!is_dir(dirname(__FILE__).DS.'res'.DS.$school)){
-                mkdir(dirname(__FILE__).DS.'res'.DS.$school);
+            if(!is_dir(getcwd().DS.'res'.DS.$school)){
+                mkdir(getcwd().DS.'res'.DS.$school);
             }
             $class  = $stdInfos[$stdIdNum]['class'];
-            if(!is_dir(dirname(__FILE__).DS.'res'.DS.$school.DS.$class)){
-                mkdir(dirname(__FILE__).DS.'res'.DS.$school.DS.$class);
+            if(!is_dir(getcwd().DS.'res'.DS.$school.DS.$class)){
+                mkdir(getcwd().DS.'res'.DS.$school.DS.$class);
             }
-            $targetPath = dirname(__FILE__).DS.'res'.DS.$school.DS.$class.DS.$stdIdNum.'.JPG';
+            $targetPath = getcwd().DS.'res'.DS.$school.DS.$class.DS.$stdIdNum.'.JPG';
             $this->productImage($stdPicPath,$stdInfos[$stdIdNum],$targetPath);
             unset($stdInfos[$stdIdNum]);
             unset($this->files[$i]);
             //echo '当前完成数量：'.$i.'/'.$everyPartNum."\r\n";
         }
 
+        imagedestroy($this->background);
+        imagedestroy($this->mask);
         //echo '程序运行完毕。总耗时：'.time()-$time;
-        echo "完成第".($argStart+1)."部分\r\n";
+        //echo "完成第".($argStart+1)."部分\r\n";
     }
 
 
@@ -112,14 +145,6 @@ class Student
             $imgPath,   
             $imgPath, 
         );
-
-        $bg_w    = 480; // 背景图片宽度  
-        $bg_h    = 672; // 背景图片高度  
-
-        $background = imagecreatetruecolor($bg_w,$bg_h); // 背景图片  
-        $white   = imagecolorallocate($background, 255, 255, 255); // 为真彩色画布创建白色背景，再设置为透明  
-        imagefill($background, 0, 0, $white);  
-        imageColorTransparent($background, $white); 
 
         $lineArr    = array();  // 需要换行的位置  
         $space_x    = 44;  
@@ -156,7 +181,8 @@ class Student
                 break;  
             }  
             $resource   = $imagecreatefromjpeg($pic_path); 
-            $black = imagecolorallocate($background, 0, 0, 0);
+            $black = imagecolorallocate($this->background, 0, 0, 0);
+            $white = imagecolorallocate($this->background, 255, 255, 255);
             // The text to draw
             $idNum = strlen($stdInfo['id_num'])<19?$stdInfo['id_num']:"";//'411522198512086610';
             $stdName = iconv('gbk', 'utf-8', $stdInfo['std_name']);//"司马";
@@ -167,15 +193,22 @@ class Student
             $fontY = imagefontheight($fontSize);
             $fontX = imagefontwidth($fontSize);
 
-            imagettftext($background,$fontSize, 0, $start_x+($pic_w - (strlen($idNum)+2)*$fontX)/2, $start_y+$pic_h+$fontY, $black, $font, $idNum);
-            imagettftext($background,$fontSize, 0, $start_x+($pic_w - (strlen($stdName)-3)*$fontX)/2, $start_y+$pic_h+2*$fontY+3, $black, $font, $stdName);
-            imagettftext($background,$fontSize, 0, $start_x+($pic_w - (strlen($auxNum)+2)*$fontX)/2, $start_y+$pic_h+3*$fontY+6, $black, $font, $auxNum);
+            imagettftext($this->background,$fontSize, 0, $start_x+($pic_w - (strlen($idNum)+2)*$fontX)/2, $start_y+$pic_h+$fontY, $black, $font, $idNum);
+            imagettftext($this->background,$fontSize, 0, $start_x+($pic_w - (strlen($stdName)-3)*$fontX)/2, $start_y+$pic_h+2*$fontY+3, $black, $font, $stdName);
+            imagettftext($this->background,$fontSize, 0, $start_x+($pic_w - (strlen($auxNum)+2)*$fontX)/2, $start_y+$pic_h+3*$fontY+6, $black, $font, $auxNum);
 
-            imagecopyresized($background,$resource,$start_x,$start_y,0,0,$pic_w,$pic_h,imagesx($resource),imagesy($resource));
+            imagecopyresized($this->background,$resource,$start_x,$start_y,0,0,$pic_w,$pic_h,imagesx($resource),imagesy($resource));
             $start_x = $start_x + $pic_w + $space_x;  
         } 
-        imagejpeg($background,$targetPath);
-        imagedestroy($background);
+        imagejpeg($this->background,$targetPath);
+
+        //用白色蒙板图片盖住文字部分 然后这个背景图又可以重复利用了
+        $start_mask_y = 18+232;
+        imagecopyresized($this->background,$this->mask,0,$start_mask_y,0,0,$this->mask_w,$this->mask_h,imagesx($this->background),imagesy($this->mask));
+        $start_mask_y = 18+232*2+105;
+        imagecopyresized($this->background,$this->mask,0,$start_mask_y,0,0,$this->mask_w,$this->mask_h,imagesx($this->background),imagesy($this->mask));
+
+        //imagedestroy($background);
     }
 
 }
