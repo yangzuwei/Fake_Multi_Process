@@ -1,0 +1,8 @@
+{
+	"name": "fakeMutiProc/im-trans",
+	"description": "Simple PHP toys.",
+	"license": "MIT",
+	"require": {
+		"php": ">=5.3.3"
+	}
+}
