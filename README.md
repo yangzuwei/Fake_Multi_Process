@@ -13,11 +13,16 @@ ANSI 在中文操作系统中对应的字符集就是 gbk
     
     初始化的时候将画布和蒙板都存入成员变量中，节省开销
 
-静态缓存
+文件IO共享/内存share memory
 多进程    
 ## 项目文件说明
 * main.php 入口文件 里面负责配置进程数量
 * worker.php 子进程文件，实例化stduent对象，按照指定参数来运行
 * student.php 核心逻辑文件，class student 里面处理数据
+* function.php 依赖函数文件
+* frame.php 运行流程框架文件
+* config.php 配置文件
 
 ## 使用说明cli模式下 php main.php
+
+新增了内存共享的模式来共享进程间数据，在config中进行配置。

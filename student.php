@@ -1,107 +1,88 @@
 <?php
-define('DS', DIRECTORY_SEPARATOR);
+
+require_once('config.php');
+require_once('function.php');
+
 class Student
 {
     public $files;
-    public $dir;
+    public $stdInfos;
 
-    public function __construct($dir){
+    public function __construct($mem1Len = 0,$mem2Len = 0){
 
-        $bg_w = $this->mask_w = 480; // ±³¾°Í¼Æ¬¿í¶È  
-        $bg_h    = 672; // ±³¾°Í¼Æ¬¸ß¶È  
+        //åˆå§‹åŒ–å›¾ç‰‡èƒŒæ™¯å’Œè’™æ¿
+        $this->initImage();
+        //åˆ¤æ–­æ˜¯ä»€ä¹ˆæ¨¡å¼ é»˜è®¤å†…å­˜å…±äº«
+        if (SHARE_MODE) {
+            $shmId = shmop_open(MEM_ADDR, 'c', 0667, $mem1Len+$mem2Len);
+            $data1 = shmop_read($shmId, 0, $mem1Len);
+            $data2 = shmop_read($shmId, $mem1Len, $mem2Len);
+            $this->files = unserialize($data1);
+            $this->stdInfos = unserialize($data2);
+        }else{
+            $this->getFiles();
+            $this->getStuInfo();
+        }
 
-        $this->background = imagecreatetruecolor($bg_w,$bg_h); // ±³¾°Í¼Æ¬  
-        $white   = imagecolorallocate($this->background, 255, 255, 255); // ÎªÕæ²ÊÉ«»­²¼´´½¨°×É«±³¾°£¬ÔÙÉèÖÃÎªÍ¸Ã÷  
+    }
+
+    protected function initImage()
+    {
+        $bg_w = $this->mask_w = 480; // èƒŒæ™¯å›¾ç‰‡å®½åº¦  
+        $bg_h    = 672; // èƒŒæ™¯å›¾ç‰‡é«˜åº¦  
+        $this->background = imagecreatetruecolor($bg_w,$bg_h); // èƒŒæ™¯å›¾ç‰‡  
+        $white   = imagecolorallocate($this->background, 255, 255, 255); // ä¸ºçœŸå½©è‰²ç”»å¸ƒåˆ›å»ºç™½è‰²èƒŒæ™¯ï¼Œå†è®¾ç½®ä¸ºé€æ˜Ž  
         imagefill($this->background, 0, 0, $white);  
         imageColorTransparent($this->background, $white); 
-
         $font = 'C:\Windows\Fonts\simhei.ttf'; 
         $fontSize = 14;
         $fontY = imagefontheight($fontSize);
-
         $this->mask_h = 3*$fontY + 10;
-
         $this->mask = imagecreatetruecolor($this->mask_w,$this->mask_h);
-        imagefill($this->mask, 0, 0, $white); 
-        $this->dir = $dir;
+        imagefill($this->mask, 0, 0, $white);         
     }
 
-    /**
-     * ±éÀúÄ¿±êÎÄ¼þ¼Ð È¡µÃÎÄ¼þ¾ø¶ÔÂ·¾¶
-     */
-    public function scanAll($dir)
+    //ç”¨äºŽæ–‡ä»¶ç¼“å­˜
+    protected function getFiles()
     {
-       //$dir=iconv("utf-8","gb2312//IGNORE",$dir);
-       if( strtoupper(pathinfo($dir, PATHINFO_EXTENSION)) == 'JPG' ){
-           $this->files[] = $dir;
-       }        
-      if (is_dir($dir)){
-        $children = scandir($dir);
-        foreach ($children as $child){
-          if ($child !== '.' && $child !== '..'){
-            $this->scanAll($dir.'/'.$child);
-          }
-        }
-      }
-    }
-
-    public function getFiles()
-    {
-        //ÏÈ´ÓÎÄ¼þÀïÃæ¶Á»º´æ
-        if(file_exists('files.tmp')){
-            $tmp = file_get_contents('files.tmp');
-            $this->files = unserialize($tmp);
+        //å…ˆä»Žæ–‡ä»¶é‡Œé¢è¯»ç¼“å­˜
+        if(file_exists(FILEINFO) && $tmp = unserialize(file_get_contents(FILEINFO))){
+            $this->files = $tmp;
         }else{
-            $this->scanAll($this->dir);
-            file_put_contents('files.tmp', serialize($this->files));
+            exit('ç¨‹åºå‡ºé”™ï¼Œæ— æ³•èŽ·å–ç…§ç‰‡æºæ–‡ä»¶åç§°');
         }
 
     }
 
-    public function getStuInfo()
+    //ç”¨äºŽæ–‡ä»¶ç¼“å­˜
+    protected function getStuInfo()
     {
-        //ÏÈ´ÓÎÄ¼þÀïÃæ¶Á»º´æ
-        if(file_exists('stdinfo.tmp')){
-            $tmp = file_get_contents('stdinfo.tmp');
-            return unserialize($tmp);
+        //å…ˆä»Žæ–‡ä»¶é‡Œé¢è¯»ç¼“å­˜
+        if(file_exists(STDINFO) && $tmp = unserialize(file_get_contents(STDINFO))){
+            $this->stdInfos = $tmp;
+        }else{
+            //å¦‚æžœæ²¡æœ‰å°±ä»Žæ•°æ®åº“é‡Œé¢æ‹¿
+            $this->stdInfos = getDb();            
         }
-        //Èç¹ûÃ»ÓÐ¾Í´ÓÊý¾Ý¿âÀïÃæÄÃ
-        $dsn = 'mysql:dbname=student;host=127.0.0.1';
-        $user = 'root';
-        $password = 'root';
 
-        try {
-            $dbh = new PDO($dsn, $user, $password);
-        } catch (PDOException $e) {
-            echo 'Connection failed: ' . $e->getMessage();
-        }
-        $dbh->query('set names gbk');
-         
-        $data = $dbh->query('select * from students');
-        $stdInfos = [];
-        foreach ($data as $key => $value) {
-            $stdInfos[$value['id_num']] = $value;
-        }
-        file_put_contents('stdinfo.tmp', serialize($stdInfos));
-        return $stdInfos;
     }
 
     public function run($argStart,$partNum)
     {
-        $this->getFiles();   
-        //½«Òª´¦ÀíµÄÎÄ¼þÊý×é·Ö³É10·Ý
+          
+        //å°†è¦å¤„ç†çš„æ–‡ä»¶æ•°ç»„åˆ†æˆnä»½
         $totalNum = count($this->files);
         $everyPartNum = intval($totalNum/$partNum)+1;
 
-        //´Ó½ÓÊÜµÄargv[1] ²ÎÊýÖÐ»ñµÃ¸Ã·ÝµÄ±êÊ¶Í·Êý×Ö
+        //ä»ŽæŽ¥å—çš„argv[1] å‚æ•°ä¸­èŽ·å¾—è¯¥ä»½çš„æ ‡è¯†å¤´æ•°å­—
          
-        //ÏÈ´ÓÊý¾Ý¿âÖÐ°ÑÑ§ÉúµÄ Éí·ÝÖ¤ºÅ ÐÕÃû Ñ§¼®¸¨ºÅ Ñ§Ð£ °à¼¶ÐÅÏ¢ ÄÃ³öÀ´
-        $stdInfos = $this->getStuInfo();
+        //å…ˆä»Žæ•°æ®åº“ä¸­æŠŠå­¦ç”Ÿçš„ èº«ä»½è¯å· å§“å å­¦ç±è¾…å· å­¦æ ¡ ç­çº§ä¿¡æ¯ æ‹¿å‡ºæ¥
+        $stdInfos = $this->stdInfos;
         //var_dump($stdInfos);exit();
-        //echo '³ÌÐò¿ªÊ¼Æô¶¯¡­¡­'."\r\n";
+        //echo 'ç¨‹åºå¼€å§‹å¯åŠ¨â€¦â€¦'."\r\n";
         $time = time();
         
-        //echo 'µ±Ç°²¿·Ö´¦ÀíÑ§ÉúÕÕÆ¬×ÜÁ¿£º'.$everyPartNum;
+        //echo 'å½“å‰éƒ¨åˆ†å¤„ç†å­¦ç”Ÿç…§ç‰‡æ€»é‡ï¼š'.$everyPartNum;
         $startNum = $argStart*$everyPartNum;
         $endNum = ($startNum+$everyPartNum)>$totalNum?$totalNum:($startNum+$everyPartNum);
         for ($i = $startNum; $i< $endNum; $i++) {
@@ -111,7 +92,7 @@ class Student
             if( isset($stdInfos[$stdIdNum]) === false ){
                 continue;
             }
-            //ÔÚµ±Ç°Ä¿Â¼ÏÂ½¨Á¢¶ÔÓ¦µÄÎÄ¼þ¼Ð£¨Èç¹û²»´æÔÚ£©
+            //åœ¨å½“å‰ç›®å½•ä¸‹å»ºç«‹å¯¹åº”çš„æ–‡ä»¶å¤¹ï¼ˆå¦‚æžœä¸å­˜åœ¨ï¼‰
             if(!is_dir(getcwd().DS."res")){
                 mkdir(getcwd().DS."res");
             }
@@ -127,13 +108,13 @@ class Student
             $this->productImage($stdPicPath,$stdInfos[$stdIdNum],$targetPath);
             unset($stdInfos[$stdIdNum]);
             unset($this->files[$i]);
-            //echo 'µ±Ç°Íê³ÉÊýÁ¿£º'.$i.'/'.$everyPartNum."\r\n";
+            //echo 'å½“å‰å®Œæˆæ•°é‡ï¼š'.$i.'/'.$everyPartNum."\r\n";
         }
 
         imagedestroy($this->background);
         imagedestroy($this->mask);
-        //echo '³ÌÐòÔËÐÐÍê±Ï¡£×ÜºÄÊ±£º'.time()-$time;
-        //echo "Íê³ÉµÚ".($argStart+1)."²¿·Ö\r\n";
+        //echo 'ç¨‹åºè¿è¡Œå®Œæ¯•ã€‚æ€»è€—æ—¶ï¼š'.time()-$time;
+        //echo "å®Œæˆç¬¬".($argStart+1)."éƒ¨åˆ†\r\n";
     }
 
 
@@ -146,16 +127,16 @@ class Student
             $imgPath, 
         );
 
-        $lineArr    = array();  // ÐèÒª»»ÐÐµÄÎ»ÖÃ  
+        $lineArr    = array();  // éœ€è¦æ¢è¡Œçš„ä½ç½®  
         $space_x    = 44;  
         $space_y    = 105;  
         $line_x  = 10;  
 
-        //µ¥ÕÅÕÕÆ¬
-        $start_x    = 32;    // ¿ªÊ¼Î»ÖÃX  
-        $start_y    = 18;    // ¿ªÊ¼Î»ÖÃY  
-        $pic_w   = 188;//intval($bg_w/2) - 5; // ¿í¶È  
-        $pic_h   = 232;//intval($bg_h/2) - 5; // ¸ß¶È  
+        //å•å¼ ç…§ç‰‡
+        $start_x    = 32;    // å¼€å§‹ä½ç½®X  
+        $start_y    = 18;    // å¼€å§‹ä½ç½®Y  
+        $pic_w   = 188;//intval($bg_w/2) - 5; // å®½åº¦  
+        $pic_h   = 232;//intval($bg_h/2) - 5; // é«˜åº¦  
         $lineArr = array(3);  
         $line_x  = 32;  
 
@@ -185,7 +166,7 @@ class Student
             $white = imagecolorallocate($this->background, 255, 255, 255);
             // The text to draw
             $idNum = strlen($stdInfo['id_num'])<19?$stdInfo['id_num']:"";//'411522198512086610';
-            $stdName = iconv('gbk', 'utf-8', $stdInfo['std_name']);//"Ë¾Âí";
+            $stdName = iconv('gbk', 'utf-8', $stdInfo['std_name']);//"å¸é©¬";
             $auxNum = $stdInfo['aux_num'];//"2016155222030001";
             // Replace path by your own font path
             $font = 'C:\Windows\Fonts\simhei.ttf'; 
@@ -202,7 +183,7 @@ class Student
         } 
         imagejpeg($this->background,$targetPath);
 
-        //ÓÃ°×É«ÃÉ°åÍ¼Æ¬¸Ç×¡ÎÄ×Ö²¿·Ö È»ºóÕâ¸ö±³¾°Í¼ÓÖ¿ÉÒÔÖØ¸´ÀûÓÃÁË
+        //ç”¨ç™½è‰²è’™æ¿å›¾ç‰‡ç›–ä½æ–‡å­—éƒ¨åˆ† ç„¶åŽè¿™ä¸ªèƒŒæ™¯å›¾åˆå¯ä»¥é‡å¤åˆ©ç”¨äº†
         $start_mask_y = 18+232;
         imagecopyresized($this->background,$this->mask,0,$start_mask_y,0,0,$this->mask_w,$this->mask_h,imagesx($this->background),imagesy($this->mask));
         $start_mask_y = 18+232*2+105;
