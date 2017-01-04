@@ -77,7 +77,7 @@ class Student
         //从接受的argv[1] 参数中获得该份的标识头数字
          
         //先从数据库中把学生的 身份证号 姓名 学籍辅号 学校 班级信息 拿出来
-        $stdInfos = $this->stdInfos;
+
         //var_dump($stdInfos);exit();
         //echo '程序开始启动……'."\r\n";
         $time = time();
@@ -85,36 +85,47 @@ class Student
         //echo '当前部分处理学生照片总量：'.$everyPartNum;
         $startNum = $argStart*$everyPartNum;
         $endNum = ($startNum+$everyPartNum)>$totalNum?$totalNum:($startNum+$everyPartNum);
+
+        $this->exePart($startNum, $endNum);
+        // foreach ($this->exePart($startNum, $endNum) as $value) {
+        //     echo $value;
+        // }
+
+        imagedestroy($this->background);
+        imagedestroy($this->mask);
+        //echo '程序运行完毕。总耗时：'.time()-$time;
+        //echo "完成第".($argStart+1)."部分\r\n";
+    }
+
+    public function exePart($startNum, $endNum)
+    {
         for ($i = $startNum; $i< $endNum; $i++) {
             $stdPicPath = $this->files[$i];
 
             $stdIdNum = basename($stdPicPath, '.JPG');
-            if( isset($stdInfos[$stdIdNum]) === false ){
+
+            if( isset($this->stdInfos[$stdIdNum]) === false ){
                 continue;
             }
             //在当前目录下建立对应的文件夹（如果不存在）
             if(!is_dir(getcwd().DS."res")){
                 mkdir(getcwd().DS."res");
             }
-            $school = $stdInfos[$stdIdNum]['school'];
+            $school = $this->stdInfos[$stdIdNum]['school'];
             if(!is_dir(getcwd().DS.'res'.DS.$school)){
                 mkdir(getcwd().DS.'res'.DS.$school);
             }
-            $class  = $stdInfos[$stdIdNum]['class'];
+            $class  = $this->stdInfos[$stdIdNum]['class'];
             if(!is_dir(getcwd().DS.'res'.DS.$school.DS.$class)){
                 mkdir(getcwd().DS.'res'.DS.$school.DS.$class);
             }
             $targetPath = getcwd().DS.'res'.DS.$school.DS.$class.DS.$stdIdNum.'.JPG';
-            $this->productImage($stdPicPath,$stdInfos[$stdIdNum],$targetPath);
-            unset($stdInfos[$stdIdNum]);
+            
+            $this->productImage($stdPicPath,$this->stdInfos[$stdIdNum],$targetPath);
+            unset($this->stdInfos[$stdIdNum]);
             unset($this->files[$i]);
             //echo '当前完成数量：'.$i.'/'.$everyPartNum."\r\n";
-        }
-
-        imagedestroy($this->background);
-        imagedestroy($this->mask);
-        //echo '程序运行完毕。总耗时：'.time()-$time;
-        //echo "完成第".($argStart+1)."部分\r\n";
+        }        
     }
 
 

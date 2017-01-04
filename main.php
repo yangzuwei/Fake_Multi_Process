@@ -15,7 +15,7 @@ echo '程序开始启动...'.$shareMode.'模式下处理'."\r\n";
 
 $files = [];
 
-$file_path = "E:\桌面\学籍验印2016\所有数据\src";
+$file_path = "E:\桌面\学籍验印2016\所有数据\src";//"E:\桌面\学籍验印2016\原始照片（已经处理）";
 scanAll($file_path,$files);
 
 $data[0] = $files;
