@@ -23,6 +23,8 @@ class Student
             $this->getFiles();
             $this->getStuInfo();
         }
+        //判断是否是处理文件的模式 如果是则调用处理函数 如果不是则直接复制文件到对应的目录中
+        $this->handPic = IS_HANDLE?'productImage':'copyImage';
 
     }
 
@@ -99,6 +101,7 @@ class Student
 
     public function exePart($startNum, $endNum)
     {
+        $handPic = $this->handPic;
         for ($i = $startNum; $i< $endNum; $i++) {
             $stdPicPath = $this->files[$i];
 
@@ -121,7 +124,8 @@ class Student
             }
             $targetPath = getcwd().DS.'res'.DS.$school.DS.$class.DS.$stdIdNum.'.JPG';
             
-            $this->productImage($stdPicPath,$this->stdInfos[$stdIdNum],$targetPath);
+            //此处不够严谨 应该判断一下图像文件是否完整合法
+            $this->$handPic($stdPicPath,$this->stdInfos[$stdIdNum],$targetPath);
             unset($this->stdInfos[$stdIdNum]);
             unset($this->files[$i]);
             //echo '当前完成数量：'.$i.'/'.$everyPartNum."\r\n";
@@ -129,7 +133,12 @@ class Student
     }
 
 
-    public function productImage($imgPath,$stdInfo,$targetPath)
+    protected function copyImage($imgPath,$stdInfo,$targetPath)
+    {
+        return copy($imgPath, $targetPath);
+    }
+
+    protected function productImage($imgPath,$stdInfo,$targetPath)
     {
         $pic_list = array(  
             $imgPath,  
@@ -168,11 +177,22 @@ class Student
                 break;  
                 case 'gif':  
                 default:  
-                    $imagecreatefromjpeg    = 'imagecreatefromstring';  
-                    $pic_path    = file_get_contents($pic_path);  
+                    $imagecreatefromjpeg    = 'imagecreatefromstring';    
                 break;  
-            }  
-            $resource   = $imagecreatefromjpeg($pic_path); 
+            }
+
+            // try{
+            //     $resource   = @$imagecreatefromjpeg($pic_path);
+            //     if (!$resource) {
+            //          throw new \Exception("照片文件损坏");  
+            //      }
+            // }catch(\Excption $e){
+            //     echo $e->message();
+            //     file_put_contents('error.log', $e->message());
+            // }finally{
+            //     return false;
+            // }  
+ 
             $black = imagecolorallocate($this->background, 0, 0, 0);
             $white = imagecolorallocate($this->background, 255, 255, 255);
             // The text to draw
@@ -199,7 +219,7 @@ class Student
         imagecopyresized($this->background,$this->mask,0,$start_mask_y,0,0,$this->mask_w,$this->mask_h,imagesx($this->background),imagesy($this->mask));
         $start_mask_y = 18+232*2+105;
         imagecopyresized($this->background,$this->mask,0,$start_mask_y,0,0,$this->mask_w,$this->mask_h,imagesx($this->background),imagesy($this->mask));
-
+        return true;
         //imagedestroy($background);
     }
 

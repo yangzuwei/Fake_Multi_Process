@@ -65,3 +65,9 @@ function scanAll($dir, &$files)
     return;
 }
 
+function errorHandler($errno, $errmsg, $filename, $linenum, $vars)  
+{
+    return file_put_contents('error.log', $errno.$errmsg.$filename.$linenum.$vars."\r\n") ;
+
+}
+

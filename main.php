@@ -2,6 +2,7 @@
 require_once('config.php');
 require_once('function.php');
 require_once('frame.php');
+set_error_handler('errorHandler');
 //只能在cli模式下运行
 if(php_sapi_name() === 'cli'){
     echo 'cli 模式启动'."\r\n";
@@ -15,7 +16,8 @@ echo '程序开始启动...'.$shareMode.'模式下处理'."\r\n";
 
 $files = [];
 
-$file_path = "E:\桌面\学籍验印2016\所有数据\src";//"E:\桌面\学籍验印2016\原始照片（已经处理）";
+//$file_path = "E:\桌面\学籍验印2016\所有数据\src";
+$file_path = "E:\桌面\学籍验印2016\原始照片（已经处理）";
 scanAll($file_path,$files);
 
 $data[0] = $files;
