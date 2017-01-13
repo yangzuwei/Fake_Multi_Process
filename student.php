@@ -180,9 +180,9 @@ class Student
                     $imagecreatefromjpeg    = 'imagecreatefromstring';    
                 break;  
             }
-
+            $resource   = @$imagecreatefromjpeg($pic_path);
             // try{
-            //     $resource   = @$imagecreatefromjpeg($pic_path);
+            //     
             //     if (!$resource) {
             //          throw new \Exception("照片文件损坏");  
             //      }
