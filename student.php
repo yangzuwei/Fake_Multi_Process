@@ -111,18 +111,19 @@ class Student
                 continue;
             }
             //在当前目录下建立对应的文件夹（如果不存在）
-            if(!is_dir(getcwd().DS."res")){
-                mkdir(getcwd().DS."res");
+            $root_path = getcwd().DS."res".date('Ymd');
+            if(!is_dir($root_path)){
+                mkdir($root_path);
             }
-            $school = $this->stdInfos[$stdIdNum]['school'];
-            if(!is_dir(getcwd().DS.'res'.DS.$school)){
-                mkdir(getcwd().DS.'res'.DS.$school);
+            $school_path = $root_path.DS.$this->stdInfos[$stdIdNum]['school'];
+            if(!is_dir($school_path)){
+                mkdir($school_path);
             }
-            $class  = $this->stdInfos[$stdIdNum]['class'];
-            if(!is_dir(getcwd().DS.'res'.DS.$school.DS.$class)){
-                mkdir(getcwd().DS.'res'.DS.$school.DS.$class);
+            $class_path  = $school_path.DS.$this->stdInfos[$stdIdNum]['class'];
+            if(!is_dir($class_path)){
+                mkdir($class_path);
             }
-            $targetPath = getcwd().DS.'res'.DS.$school.DS.$class.DS.$stdIdNum.'.JPG';
+            $targetPath = $class_path.DS.$stdIdNum.'.JPG';
             
             //此处不够严谨 应该判断一下图像文件是否完整合法
             $this->$handPic($stdPicPath,$this->stdInfos[$stdIdNum],$targetPath);
