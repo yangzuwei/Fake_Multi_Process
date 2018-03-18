@@ -6,8 +6,9 @@ class Frame{
     protected $mode;
     public $data;
 
-    public function __construct($mode,&$data)
+    public function __construct($mode,$data)
     {
+        $this->data = $data;
         $files = serialize($data[0]);
         $stdInfos = serialize($data[1]);      
         if($mode){
@@ -15,7 +16,7 @@ class Frame{
 
             $this->mem1Len = strlen($files);
             $this->mem2Len = strlen($stdInfos);
-            //»®¶¨ÄÚ´æ¿é
+            //ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½
             $this->shmId = shmop_open(MEM_ADDR, 'c', 0667, $this->mem1Len+$this->mem2Len);
             shmop_write($this->shmId, $shareData, 0);
         }else{
@@ -25,21 +26,26 @@ class Frame{
         $this->mode = $mode;
     }
 
+    protected function getProcessNum($fileCount)
+    {
+        $step = 1400;
+        return (int)ceil($fileCount/$step);
+    }
 
-    //¿ªÆôÖ¸¶¨ÊýÄ¿½ø³Ì£¬½«½ø³Ì×ÊÔ´´æµ½Êý×éÖÐ
-    public function mutiProc($pro_num){
-        $otherArgs = '';
-        if($this->mode){
-            $otherArgs = $this->mem1Len.' '.$this->mem2Len;
-        }
+    //åº”è¯¥ä½¿ç”¨å½“å‰è¦å¤„ç†çš„æ–‡ä»¶æ•°é‡æ¥æ™ºèƒ½åˆ’åˆ†ä»»åŠ¡ æ–‡ä»¶æ•°é‡å’Œè¿›ç¨‹æ•°é‡ å®šä¹‰ä¸€ä¸ªçº¿æ€§ç›¸å…³çš„å‡½æ•°å³å¯
+    public function mutiProc(){
+
+        $fileCount = count($this->data[0]);
+        $pro_num = $this->getProcessNum($fileCount);
 
         for($i = 0;$i<$pro_num;$i++){
-            $command = 'php worker.php '.$i.' '.$pro_num.' '.$otherArgs;   
+            $command = 'php worker.php '.$i.' '.$pro_num;
+            file_put_contents('frame.log',$command."\r\n",FILE_APPEND);
             $this->handler[] = popen($command,'r');   
         }   
     }
 
-    //¹Ø±Õ½ø³Ì×ÊÔ´
+    //ï¿½Ø±Õ½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´
     function closeHandler()
     {
         foreach ($this->handler as $prc) {
@@ -47,7 +53,7 @@ class Frame{
         }
     }
 
-    //É¾³ý»º´æÎÄ¼þ »òÕßÊÍ·Å
+    //É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½
     function deleteCache()
     {
         if($this->mode){
@@ -65,7 +71,7 @@ class Frame{
 
     public function run()
     {
-        $this->mutiProc(PROCESS_NUM);
+        $this->mutiProc();
         $this->closeHandler();
         $this->deleteCache();
     }

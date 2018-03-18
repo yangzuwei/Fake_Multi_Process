@@ -7,9 +7,10 @@ class Student
 {
     public $files;
     public $stdInfos;
+    static $link;
 
     public function __construct($mem1Len = 0,$mem2Len = 0){
-
+        self::$link = getLink();
         //初始化图片背景和蒙板
         $this->initImage();
         //判断是什么模式 默认内存共享
@@ -71,47 +72,49 @@ class Student
 
     public function run($argStart,$partNum)
     {
-          
-        //将要处理的文件数组分成n份
-        $totalNum = count($this->files);
-        $everyPartNum = intval($totalNum/$partNum)+1;
-
-        //从接受的argv[1] 参数中获得该份的标识头数字
-         
-        //先从数据库中把学生的 身份证号 姓名 学籍辅号 学校 班级信息 拿出来
-
-        //var_dump($stdInfos);exit();
-        //echo '程序开始启动……'."\r\n";
-        $time = time();
-        
-        //echo '当前部分处理学生照片总量：'.$everyPartNum;
-        $startNum = $argStart*$everyPartNum;
-        $endNum = ($startNum+$everyPartNum)>$totalNum?$totalNum:($startNum+$everyPartNum);
-
-        $this->exePart($startNum, $endNum);
-        // foreach ($this->exePart($startNum, $endNum) as $value) {
-        //     echo $value;
-        // }
-
+        $this->customDivide($argStart,$partNum);
         imagedestroy($this->background);
         imagedestroy($this->mask);
         //echo '程序运行完毕。总耗时：'.time()-$time;
         //echo "完成第".($argStart+1)."部分\r\n";
     }
 
+    protected function customDivide($argStart,$partNum)
+    {
+        //将要处理的文件数组分成n份
+        $totalNum = count($this->files);
+        $everyPartNum = intval($totalNum/$partNum)+1;
+
+        //从接受的argv[1] 参数中获得该份的标识头数字
+
+        //先从数据库中把学生的 身份证号 姓名 学籍辅号 学校 班级信息 拿出来
+
+        //var_dump($stdInfos);exit();
+        //echo '程序开始启动……'."\r\n";
+        $time = time();
+
+        //echo '当前部分处理学生照片总量：'.$everyPartNum;
+        $startNum = $argStart*$everyPartNum;
+        $endNum = ($startNum+$everyPartNum)>$totalNum?$totalNum:($startNum+$everyPartNum);
+        $this->exePart($startNum, $endNum);
+    }
+
+    //执行处理文件数组的一个部分参数为数组下标起始值
     public function exePart($startNum, $endNum)
     {
         $handPic = $this->handPic;
+
         for ($i = $startNum; $i< $endNum; $i++) {
             $stdPicPath = $this->files[$i];
 
-            $stdIdNum = basename($stdPicPath, '.JPG');
+            $stdIdNum = explode('.',basename($stdPicPath))[0];
 
             if( isset($this->stdInfos[$stdIdNum]) === false ){
                 continue;
             }
             //在当前目录下建立对应的文件夹（如果不存在）
-            $root_path = getcwd().DS."res".date('Ymd');
+            $root_path = getcwd().DS."res".DS.date('Ymd');
+
             if(!is_dir($root_path)){
                 mkdir($root_path);
             }
@@ -127,8 +130,10 @@ class Student
             
             //此处不够严谨 应该判断一下图像文件是否完整合法
             $this->$handPic($stdPicPath,$this->stdInfos[$stdIdNum],$targetPath);
-            unset($this->stdInfos[$stdIdNum]);
-            unset($this->files[$i]);
+            //将处理后的学生标识为已经处理
+            self::$link->query('update student set is_handle = 1 where id_num = '.$stdIdNum);
+//            unset($this->stdInfos[$stdIdNum]);
+//            unset($this->files[$i]);
             //echo '当前完成数量：'.$i.'/'.$everyPartNum."\r\n";
         }        
     }
@@ -181,19 +186,10 @@ class Student
                     $imagecreatefromjpeg    = 'imagecreatefromstring';    
                 break;  
             }
-            $resource   = @$imagecreatefromjpeg($pic_path);
-            // try{
-            //     
-            //     if (!$resource) {
-            //          throw new \Exception("照片文件损坏");  
-            //      }
-            // }catch(\Excption $e){
-            //     echo $e->message();
-            //     file_put_contents('error.log', $e->message());
-            // }finally{
-            //     return false;
-            // }  
- 
+            $resource   = $imagecreatefromjpeg($pic_path);
+
+            file_put_contents('log.txt',$pic_path);
+
             $black = imagecolorallocate($this->background, 0, 0, 0);
             $white = imagecolorallocate($this->background, 255, 255, 255);
             // The text to draw

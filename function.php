@@ -1,7 +1,6 @@
 <?php
 
-//ÄÃÊý¾Ý¿âÖÐµÄÐÅÏ¢
-function getDb()
+function getLink()
 {
     $dsn = 'mysql:dbname=student;host=127.0.0.1';
     $user = 'root';
@@ -13,7 +12,12 @@ function getDb()
         echo 'Connection failed: ' . $e->getMessage();
     }
     $dbh->query('set names gbk');
-     
+    return $dbh;
+}
+
+function getDb()
+{
+    $dbh = getLink();
     $data = $dbh->query('select * from student');
     $dbh = null;
 
@@ -24,7 +28,7 @@ function getDb()
     return $stdInfos;
 }
 
-//ÄÃÎÄ¼þ¼ÐÖÐµÄÐÅÏ¢ µÝ¹éµ÷ÓÃ
+//ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½Ï¢ ï¿½Ý¹ï¿½ï¿½ï¿½ï¿½
 // function scanAll($dir, &$files)
 // {
 //    //$dir=iconv("utf-8","gb2312//IGNORE",$dir);
@@ -41,14 +45,14 @@ function getDb()
 //   }
 // }
 
-//ÄÃÎÄ¼þ¼ÐÖÐµÄ¾ßÌåÐÅÏ¢ ·ÇµÝ¹é
+//ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ÐµÄ¾ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ ï¿½ÇµÝ¹ï¿½
 function scanAll($dir, &$files)
 {
     if(!is_dir($dir))return;
-    //·ÅÎÄ¼þ¼ÐµÄÈÝÆ÷
+    //ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½
     $dirStack = [$dir];
     do{
-        //µ¯Õ»
+        //ï¿½ï¿½Õ»
         $dir = array_pop($dirStack);
         $tmpFiles = scandir($dir); 
         foreach ($tmpFiles as $file) {

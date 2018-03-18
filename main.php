@@ -3,21 +3,21 @@ require_once('config.php');
 require_once('function.php');
 require_once('frame.php');
 set_error_handler('errorHandler');
-//只能在cli模式下运行
+//只锟斤拷锟斤拷cli模式锟斤拷锟斤拷锟斤拷
 if(php_sapi_name() === 'cli'){
-    echo 'cli 模式启动'."\r\n";
+    echo 'cli start'."\r\n";
 }else{
-    exit('本程序只能在cli模式下启动');
+    exit('mode is wrong!'."\r\n");
 }
 $start = time();
-$shareMode = SHARE_MODE?'共享内存':'共享文件';
-echo '程序开始启动...'.$shareMode.'模式下处理'."\r\n";
+$shareMode = SHARE_MODE?'memory':'file';
+echo 'share mode is ...'.$shareMode."\r\n";
 
 
 $files = [];
 
-$file_path = "E:\桌面\学籍验印2016\所有数据\src";
-//$file_path = "E:\桌面\学籍验印2016\原始照片（已经处理）";
+$file_path = "E:\student\/20180318";
+//$file_path = "E:\锟斤拷锟斤拷\学锟斤拷锟斤拷印2016\原始锟斤拷片锟斤拷锟窖撅拷锟斤拷锟斤拷";
 scanAll($file_path,$files);
 
 $data[0] = $files;
@@ -27,4 +27,4 @@ $app = new Frame(SHARE_MODE,$data);
 
 $app->run();
 
-echo '处理完成！共耗时'.(time()-$start).'s';
+echo 'total time is'.(time()-$start).'s';
