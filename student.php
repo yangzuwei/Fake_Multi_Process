@@ -126,18 +126,14 @@ class Student
             if(!is_dir($class_path)){
                 mkdir($class_path);
             }
-            $targetPath = $class_path.DS.$stdIdNum.'.JPG';
+            $targetPath = $class_path.DS.$stdIdNum.'.jpg';
             
             //此处不够严谨 应该判断一下图像文件是否完整合法
             $this->$handPic($stdPicPath,$this->stdInfos[$stdIdNum],$targetPath);
             //将处理后的学生标识为已经处理
             self::$link->query('update student set is_handle = 1 where id_num = '.$stdIdNum);
-//            unset($this->stdInfos[$stdIdNum]);
-//            unset($this->files[$i]);
-            //echo '当前完成数量：'.$i.'/'.$everyPartNum."\r\n";
         }        
     }
-
 
     protected function copyImage($imgPath,$stdInfo,$targetPath)
     {
@@ -187,8 +183,6 @@ class Student
                 break;  
             }
             $resource   = $imagecreatefromjpeg($pic_path);
-
-            file_put_contents('log.txt',$pic_path);
 
             $black = imagecolorallocate($this->background, 0, 0, 0);
             $white = imagecolorallocate($this->background, 255, 255, 255);
