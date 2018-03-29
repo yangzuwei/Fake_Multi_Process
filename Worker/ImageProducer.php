@@ -90,7 +90,7 @@ class ImageProducer
         }
 
 		if($line == 1){
-            $degree = -3;
+            $indent = -3;
             $text = iconv('gbk', 'utf-8', $text);//"司马";
         }
 
