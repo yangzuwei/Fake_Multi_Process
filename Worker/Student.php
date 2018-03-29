@@ -95,21 +95,29 @@ class Student
 
     protected function makeDirAndTarget($stdIdNum)
     {
+        $dirArr = [];
+        $school = '_'.$this->stdInfos[$stdIdNum]['school'].'_';//iconv("UTF-8", "GBK",);
+        $class =  '_'.$this->stdInfos[$stdIdNum]['class'].'_';//iconv("UTF-8", "GBK", );
         //在当前目录下建立对应的文件夹（如果不存在）
-        $root_path = getcwd() . DS . "res" . DS . date('Ymd');
+        $file = getcwd() . DS
+            . "result" . DS
+            . date('Ymd'). DS
+            . $school. DS
+            . $class. DS
+            .$stdIdNum . '.jpg';
 
-        if (!is_dir($root_path)) {
-            mkdir($root_path);
+        $tmpDir = dirname($file);
+
+        while (!is_dir($tmpDir)){
+            array_push($dirArr, $tmpDir);
+            $tmpDir = dirname($tmpDir);
         }
-        $school_path = $root_path . DS . $this->stdInfos[$stdIdNum]['school'];
-        if (!is_dir($school_path)) {
-            mkdir($school_path);
+
+        while(count($dirArr)){
+            mkdir(array_pop($dirArr));
         }
-        $class_path = $school_path . DS . $this->stdInfos[$stdIdNum]['class'];
-        if (!is_dir($class_path)) {
-            mkdir($class_path);
-        }
-        return $class_path . DS . $stdIdNum . '.jpg';
+
+        return $file;
     }
 }
 
