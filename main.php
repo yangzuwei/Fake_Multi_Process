@@ -1,6 +1,6 @@
 <?php
-require_once('config.php');
-require_once('function.php');
+require_once('./Config/config.php');
+require_once('./Util/function.php');
 require_once('frame.php');
 set_error_handler('errorHandler');
 //ֻ����cliģʽ������

@@ -16,7 +16,7 @@ class Frame{
 
             $this->mem1Len = strlen($files);
             $this->mem2Len = strlen($stdInfos);
-            //�����ڴ��
+
             $this->shmId = shmop_open(MEM_ADDR, 'c', 0667, $this->mem1Len+$this->mem2Len);
             shmop_write($this->shmId, $shareData, 0);
         }else{
@@ -39,13 +39,12 @@ class Frame{
         $pro_num = $this->getProcessNum($fileCount);
 
         for($i = 0;$i<$pro_num;$i++){
-            $command = 'php worker.php '.$i.' '.$pro_num;
+            $command = 'php ./Worker/worker.php '.$i.' '.$pro_num;
             file_put_contents('frame.log',$command."\r\n",FILE_APPEND);
             $this->handler[] = popen($command,'r');   
         }   
     }
 
-    //�رս�����Դ
     function closeHandler()
     {
         foreach ($this->handler as $prc) {
@@ -53,7 +52,6 @@ class Frame{
         }
     }
 
-    //ɾ�������ļ� �����ͷ�
     function deleteCache()
     {
         if($this->mode){
