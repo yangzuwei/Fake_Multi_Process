@@ -16,7 +16,7 @@ echo 'share mode is ...'.$shareMode."\r\n";
 
 $files = [];
 
-$file_path = "E:\student\/20180318";
+$file_path = "E:\student\/20180419";
 //$file_path = "E:\����\ѧ����ӡ2016\ԭʼ��Ƭ���Ѿ�����";
 scanAll($file_path,$files);
 

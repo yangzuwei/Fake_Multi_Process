@@ -86,7 +86,7 @@ class Student
 
                 $producer->productPicture($stdPicPath, $pictureText, $targetPath);
                 //将处理后的学生标识为已经处理
-                self::$link->query('update student set is_handle = 1 where id_num = ' . $stdIdNum);
+                self::$link->query('update student set is_handle = 1 where aux_num = ' . $this->stdInfos[$stdIdNum]['aux_num']);
             }else{
                 copy($stdPicPath, $targetPath);
             }
