@@ -18,7 +18,7 @@ function getLink()
 function getDb()
 {
     $dbh = getLink();
-    $data = $dbh->query('select * from student');
+    $data = $dbh->query('select * from student')->fetchAll(PDO::FETCH_ASSOC);
     $dbh = null;
 
     $stdInfos = [];

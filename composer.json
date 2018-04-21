@@ -3,9 +3,13 @@
 	"description": "Simple PHP toys.",
 	"license": "MIT",
 	"require": {
-		"php": ">=5.3.3"
+		"php": ">=7.0"
 	},
 	"autoload":{
+		"files":[
+			"./Config/config.php",
+			"./Util/function.php"
+		],
 		"psr-4":{
 			"Worker\\":"Worker/"
 		}
