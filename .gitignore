@@ -1,4 +1,5 @@
 ./res
 *.log
 ./.idea
-./Config
+./Config/config.php
+./vendor

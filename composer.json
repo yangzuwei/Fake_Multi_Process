@@ -3,7 +3,8 @@
 	"description": "Simple PHP toys.",
 	"license": "MIT",
 	"require": {
-		"php": ">=7.0"
+		"php": ">=7.0",
+		"monolog/monolog": "^1.23"
 	},
 	"autoload":{
 		"files":[

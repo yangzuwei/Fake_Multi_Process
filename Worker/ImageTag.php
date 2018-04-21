@@ -12,8 +12,7 @@ class ImageTag
 
     public function run($dir)
     {
-        $files = [];
-        scanAll($dir, $files);
+        $files = scanAll($dir);
         foreach ($files as $file) {
             $stdUnique = explode('.', basename($file))[0];
             $this->imageTag($file, $this->students[$stdUnique]);
@@ -46,7 +45,7 @@ class ImageTag
         $year = (int)date('Y');
         $iptc = array(
             '2#120' => $student['std_name'],
-            '2#116' => 'Copyright ' . $year . '-' . ($year + 5) . iconv("UTF-8", "GBK", COPYRIGHT),
+            '2#116' => 'Copyright 永久,'. iconv("UTF-8", "GBK", COPYRIGHT),
             '2#025' => $student['school'] . $student['class'],
             '2#080' => iconv("UTF-8", "GBK", AUTHOR),
         );

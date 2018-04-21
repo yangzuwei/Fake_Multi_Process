@@ -3,15 +3,14 @@
 class Frame{
 
     protected $handler;
-    protected $mode;
     public $data;
 
-    public function __construct($mode,$data)
+    public function __construct($data)
     {
         $this->data = $data;
         $files = serialize($data[0]);
         $stdInfos = serialize($data[1]);      
-        if($mode){
+        if(SHARE_MODE){
             $shareData = $files.$stdInfos;
 
             $this->mem1Len = strlen($files);
@@ -23,7 +22,6 @@ class Frame{
             file_put_contents(FILEINFO, $files);
             file_put_contents(STDINFO, $stdInfos);
         }
-        $this->mode = $mode;
     }
 
     protected function getProcessNum($fileCount)
@@ -39,8 +37,11 @@ class Frame{
         $pro_num = $this->getProcessNum($fileCount);
 
         for($i = 0;$i<$pro_num;$i++){
-            $command = 'php ./Worker/worker.php '.$i.' '.$pro_num;
-            file_put_contents('frame.log',$command."\r\n",FILE_APPEND);
+            $command = 'php worker.php '.$i.' '.$pro_num;
+            if(SHARE_MODE){
+                $command .= ' '.$this->mem1Len.' '.$this->mem2Len;
+            }
+            file_put_contents('log/frame.log',$command.PHP_EOL,FILE_APPEND);
             $this->handler[] = popen($command,'r');   
         }   
     }
@@ -54,7 +55,7 @@ class Frame{
 
     function deleteCache()
     {
-        if($this->mode){
+        if(SHARE_MODE){
             shmop_delete($this->shmId);
             shmop_close($this->shmId);
         }else{
