@@ -1,5 +1,6 @@
-./res
+res
 *.log
-./.idea
-./Config/config.php
-./vendor
+.idea
+Config/config.php
+vendor
+result

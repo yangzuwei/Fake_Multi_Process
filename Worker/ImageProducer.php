@@ -86,12 +86,11 @@ class ImageProducer
         $lineHeight = 5;//行高
 
 		if($line == 0){
-            $text = strlen($text)<19?$text:"";//'411522198512086610';
+            $text = strlen($text)<19?$text:"";//'411522200112120312';
         }
 
 		if($line == 1){
-            $indent = -3;
-            $text = iconv('gbk', 'utf-8', $text);//"司马";
+            $indent = -3;//单行缩进 学校名称
         }
 
 		$offsetX = self::MARGIN_WIDTH + (self::PIC_WIDTH - (strlen($text)+$indent)*$this->fontX)/2;
@@ -110,15 +109,12 @@ class ImageProducer
 			$i++;
 		}
 		//复制2行2列四张图
-		$this->copyMore(2,2,$destination);
+		$this->copyMore(2,2);
         imagejpeg($this->bigCanvas, $destination);
 	}
 
-	protected function copyMore($colum,$row,$destination)
+	protected function copyMore($colum,$row)
 	{
-		$resizeWidth = self::BIG_CANVAS_WIDTH/$colum;
-		$resizeHeight = self::BIG_CANVAS_HEIGHT/$row;
-		//$resizeWidth ,$resizeHeight,
 		$srcWidth = imagesx($this->canvas);
 		$srcHeight = imagesy($this->canvas);
 		for($i = 0;$i<$colum;$i++){

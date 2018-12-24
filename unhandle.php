@@ -20,12 +20,20 @@ if(php_sapi_name() === 'cli'){
 
 $oldFiles = $newFiles = [];
 
-$oldPath = "E:\student\/origin\/20180509/";//"E:\student".DIRECTORY_SEPARATOR."20180413";
+$oldPath = 'E:\student\照片20181224';
 
 $db = getLink();
 $data = $db->query('select id_num from student where is_handle = 1')->fetchAll(PDO::FETCH_ASSOC);
+$resNames = array_column($data,'id_num');
 
-foreach ($data as $item) {
-    $fullPath = $oldPath.$item['id_num'].'.JPG';
-    unlink($fullPath);
-}
+$sourceNames = scandir($oldPath);
+unset($sourceNames[0]);
+unset($sourceNames[1]);
+array_walk($sourceNames,function(&$val){
+    $val = explode('.',$val)[0];
+});
+
+$diff = array_diff($sourceNames,$resNames);
+
+$diff2 = array_diff($resNames,$sourceNames);
+var_dump($diff,$diff2);

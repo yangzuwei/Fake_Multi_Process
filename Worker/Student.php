@@ -2,14 +2,18 @@
 
 namespace Worker;
 
+use Monolog\Logger;
+
 class Student
 {
     public $files;
     public $stdInfos;
+    protected $logger;
     static $link;
 
     public function __construct($mem1Len = 0, $mem2Len = 0)
     {
+        $this->logger = new Logger('unhandler');
         self::$link = getLink();
 
         //判断是什么模式 默认内存共享
@@ -25,7 +29,8 @@ class Student
             $data = self::$link->query('select * from student');
             $stdInfoTmp = [];
             foreach ($data as $key => $value) {
-                $stdInfoTmp[$value['id_num']] = $value;
+                $id = $value['id_num'];//iconv('gbk', 'utf-8', $value['id_num']);
+                $stdInfoTmp[$id] = $value;
             }
 
             $this->stdInfos = $stdInfoTmp;
@@ -53,7 +58,6 @@ class Student
         //将要处理的文件数组分成n份
         $totalNum = count($this->files);
         $everyPartNum = intval($totalNum / $partNum) + 1;
-        $time = time();
 
         //echo '当前部分处理学生照片总量：'.$everyPartNum;
         $startNum = $argStart * $everyPartNum;
@@ -70,6 +74,8 @@ class Student
             $stdIdNum = explode('.', basename($stdPicPath))[0];
 
             if (isset($this->stdInfos[$stdIdNum]) === false) {
+                //日志记录映射失败的信息
+                $this->logger->info("can not find the {$stdIdNum} in the stdInfos map",[]);
                 continue;
             }
 

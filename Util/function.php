@@ -9,7 +9,7 @@ function getLink()
 
     try {
         $dbh = new PDO($dsn, $user, $password);
-        $dbh->query('set names gbk');
+        $dbh->query('set names utf8');
     } catch (PDOException $e) {
         echo 'Connection failed: ' . $e->getMessage();
     }
@@ -25,7 +25,8 @@ function getDb()
 
     $stdInfos = [];
     foreach ($data as $key => $value) {
-        $stdInfos[$value['id_num']] = $value;
+        $id = $value['id_num'];//iconv('gbk', 'utf-8', $value['id_num']);
+        $stdInfos[$id] = $value;
     }
     return $stdInfos;
 }

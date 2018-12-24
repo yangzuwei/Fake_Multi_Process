@@ -14,7 +14,7 @@ echo 'share mode is ...' . $shareMode . PHP_EOL;
 
 $files = [];
 
-$file_path = 'E:\student\原始照片收集\20180525';
+$file_path = 'E:\student\照片20181224';
 
 $files = scanAll($file_path);
 
@@ -38,7 +38,7 @@ use Monolog\Handler\StreamHandler;
 $log = new Logger('check');
 $log->pushHandler(new StreamHandler('log/invalidIds.log', Logger::NOTICE));
 
-$log->warning('未明学籍学生一共' . count($invalidIDs) . '人', PHP_EOL);
+$log->warning('未明学籍学生一共' . count($invalidIDs) . '人', []);
 foreach ($invalidIDs as $id) {
     $log->addNotice('数据库中未发现：' . $id);
 }
