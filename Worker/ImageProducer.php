@@ -11,13 +11,13 @@ class ImageProducer
 	protected $fontX;
 
 	const FONT = 'C:\Windows\Fonts\simhei.ttf'; 
-	const FONT_SIZE = 14;
-	const MARGIN_WIDTH = 25;
-	const MARGIN_HEIGHT = 15;
-	const PIC_WIDTH = 191;
-	const PIC_HEIGHT = 233;
-	const BIG_CANVAS_WIDTH = 480;
-	const BIG_CANVAS_HEIGHT = 672;
+	const FONT_SIZE = 13;
+	const MARGIN_WIDTH = 5;//25;
+	const MARGIN_HEIGHT = 2;//15;
+	const PIC_WIDTH = 175.5;//191;
+	const PIC_HEIGHT = 216;//233;
+	const BIG_CANVAS_WIDTH = 371;//480;
+	const BIG_CANVAS_HEIGHT = 580;//672;
 
 	public function __construct()
 	{
@@ -82,15 +82,15 @@ class ImageProducer
 	{
 		$black = imagecolorallocate($this->canvas, 0x00, 0x00, 0x00);
 
-		$indent = 2;//单行缩进
-        $lineHeight = 5;//行高
+		$indent = 0;//单行缩进
+        $lineHeight = 4;//行高
 
 		if($line == 0){
             $text = strlen($text)<19?$text:"";//'411522200112120312';
         }
 
 		if($line == 1){
-            $indent = -3;//单行缩进 学校名称
+            $indent = -3;//单行缩进 学生姓名
         }
 
 		$offsetX = self::MARGIN_WIDTH + (self::PIC_WIDTH - (strlen($text)+$indent)*$this->fontX)/2;
