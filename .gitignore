@@ -1,4 +1,5 @@
 res
+log
 *.log
 .idea
 Config/config.php
