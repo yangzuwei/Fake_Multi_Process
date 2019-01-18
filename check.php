@@ -11,7 +11,7 @@ $start = time();
 
 $files = $files_had = [];
 
-$file_path = 'E:\student\排版后\20180417';
+$file_path = 'E:\student\students_image_rebuild\result\20181228';
 
 $files = scanAll($file_path);
 

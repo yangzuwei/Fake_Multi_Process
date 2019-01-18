@@ -120,7 +120,7 @@ class Student
         }
 
         while(count($dirArr)){
-            mkdir(array_pop($dirArr));
+            @mkdir(array_pop($dirArr));
         }
 
         return $file;

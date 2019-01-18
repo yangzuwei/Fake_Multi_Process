@@ -67,7 +67,8 @@ class ImageProducer
                 return imagecreatefrombmp($picturePath);
                 break;
             default:
-                return imagecreatefromstring($picturePath);
+                file_put_contents('error1.log', exif_imagetype($picturePath) . PHP_EOL, FILE_APPEND);
+                return imagecreatefromjpeg($picturePath);
                 break;
         }
     }

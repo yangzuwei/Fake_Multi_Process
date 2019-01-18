@@ -14,9 +14,17 @@ echo 'share mode is ...' . $shareMode . PHP_EOL;
 
 $files = [];
 
-$file_path = 'E:\student\照片20181224';
+$file_path = 'E:\student\照片原始文件\0113';
 
 $files = scanAll($file_path);
+
+foreach ($files as $k => $f) {
+    $pathInfo = pathinfo($f);
+    $newName = $pathInfo['dirname'].DIRECTORY_SEPARATOR.strtoupper($pathInfo['basename']);
+    rename($f, $newName);
+    //var_dump($newName);exit();
+    $files[$k] = $newName;
+}
 
 $data[0] = $files;
 $data[1] = getDb();
@@ -34,6 +42,7 @@ $invalidIDs = array_diff($fileNameOfSrc, array_keys($data[1]));
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+
 // create a log channel
 $log = new Logger('check');
 $log->pushHandler(new StreamHandler('log/invalidIds.log', Logger::NOTICE));
